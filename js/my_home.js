@@ -1,38 +1,24 @@
 let AddressBookApp;
-
+var localstoragedata = localStorage.getItem('AddressBookApp');
 window.addEventListener('DOMContentLoaded', (event) => {
-    if (site_properties.use_local_storage.match("true")) {
-        getDataFromLocalStorage();
-    } else
-        getPayrollDataFromServer();
+   
+    getDataFromLocalStorage();
+    
 })
 
 function processEmployeePayrollDataResponse() {
-    //Create another method for response because this should implement after we get response from server
     document.querySelector('.emp-count').textContent = AddressBookApp.length;
     createInnerHtml();
     localStorage.removeItem("edit-emp");
 }
 
 const getDataFromLocalStorage = () => {
-    AddressBookApp = localStorage.getItem('AddressBookApp') ?
-        JSON.parse(localStorage.getItem('AddressBookApp')) : [];
+    console.log('getDataFromLocalStorage');
+    AddressBookApp = localstoragedata ? JSON.parse(localstoragedata) : [];
     processEmployeePayrollDataResponse();
 }
 
-const getPayrollDataFromServer = () => {
 
-    makeServiceCall("GET", site_properties.server_url, true)
-        .then(response => {
-            AddressBookApp = JSON.parse(response);
-            processEmployeePayrollDataResponse();
-        })
-        .catch(error => {
-            console.log("Get Error Status : " + JSON.stringify(error));
-            AddressBookApp = [];
-            processEmployeePayrollDataResponse();
-        })
-}
 
 function handleSelectChange(event) {
     var filter = event.target.value;
@@ -68,19 +54,56 @@ function handleStateChange(event) {
     }
     
 }
-
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("display");
+    switching = true;
+    dir = "asc"; 
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch= true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount ++;      
+        } 
+        else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";switching = true;
+                
+            }
+        }
+    }
+}
 const createInnerHtml = () => {
     const headerHtml = "<tr><th>Name</th><th>Phone Number</th>" +
-        "<th>City</th><th>State</th><th>Address</th><th>Actions</th></tr>";
-    let innerHtml = `${headerHtml}`;
-    for (let empPayrollData of AddressBookApp) {
-        innerHtml = `${innerHtml}
-            <tr>
+        "<th >City</th><th>State</th><th>Address</th><th>Zipcode</th><th>Actions</th></tr>";
+    let databinding = `${headerHtml}`;
+    for (var empPayrollData of AddressBookApp) {
+        databinding = `${databinding}
+        <tr>
             <td>${empPayrollData._name}</td>
             <td>${empPayrollData._phone}</td>
             <td>${empPayrollData._city}</td>
             <td>${empPayrollData._state}</td>
             <td>${empPayrollData._address}</td>
+            <td>${empPayrollData._zipcode}</td>
             <td>
                 <img id ="${empPayrollData.id}" src="../assets/icons/delete-black-18dp.svg" alt="Delete" onClick=remove(this)>
                 <img id ="${empPayrollData.id}" src="../assets/icons/create-black-18dp.svg" alt="Edit" onClick=update(this)>
@@ -88,15 +111,7 @@ const createInnerHtml = () => {
         </tr>`
             ;
     }
-    document.querySelector('#display').innerHTML = innerHtml;
-}
-
-const getDepartmentHtml = (data) => {
-    let deptHtml = '';
-    for (let dept of data) {
-        deptHtml = `${deptHtml} <div class='dept-label'>${dept}</div>`;
-    }
-    return deptHtml;
+    document.querySelector('#display').innerHTML = databinding;
 }
 
 
@@ -126,13 +141,14 @@ const remove = (data) => {
     }
 
 }
-
 const update = (data) => {
 
     let employeeData = AddressBookApp.find(empData => empData.id == data.id);
     if (!employeeData) {
         return;
     }
-    localStorage.setItem('edit-emp', JSON.stringify(employeeData));
-    window.location.replace(site_properties.add_employee_page);
+    else{
+        localStorage.setItem('edit-emp', JSON.stringify(employeeData));
+        window.location.replace(site_properties.add_employee_page);
+    }
 }

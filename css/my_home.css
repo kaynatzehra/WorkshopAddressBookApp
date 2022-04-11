@@ -120,6 +120,7 @@ th {
     text-transform: uppercase;
     opacity: 1;
     border: 0px solid #dddddd;
+    cursor: pointer;
 }
 tr:not(:first-child) {
     background: #ffffff 0% 0% no-repeat padding-box;
@@ -160,7 +161,7 @@ td img {
 .cityclass{
     border: 1px solid #008CFF;
     border-radius: 10px;
-    padding: 20px;
+    padding: 10px;
     background: #008CFF no-repeat padding-box;
     color: white;
 }

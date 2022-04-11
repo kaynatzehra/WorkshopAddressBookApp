@@ -21,7 +21,7 @@ function validateName() {
             checkName(name.value);
             textError.textContent = "";
         } catch (e) {
-            console.error(e);
+            //console.error(e);
             textError.textContent = e;
         }
     });
@@ -43,67 +43,33 @@ function Phonenumber() {
         }
     });
 }
-
-
 function redirect() {
     console.log("redirect")
-    resetForm();
+    resetForm();   
     window.location.replace(site_properties.home_page)
 }
 
 const save = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    try {
-        
-        setAddressBookAppObject();
-        if (site_properties.use_local_storage.match("true")) {
-            createAndUpdateStorage();
-            alert("Data Stored With Name " + addressbookappObject._name);
-            redirect();
-        } else
-            createOrUpdateAddressBookInJsonServer();
-
-    } catch (e) {
-        console.log(e)
-        return;
-    }
+   
+    setAddressBookAppObject();
+    createAndUpdateStorage();
+    alert("Data Stored With Name " + addressbookappObject._name);
+    redirect();
 }
-
 const setAddressBookAppObject= () => {
 
-    //Here we are directly store values in addressbookappObject
-    if (!isUpdate && site_properties.use_local_storage.match("true")) {
-        addressbookappObject.id = createNewEmpId();
-    }
+    addressbookappObject.id = createNewEmpId();
     addressbookappObject._name = getInputValueId('#name');
     addressbookappObject._phone = getInputValueId('#phone');
     addressbookappObject._city = getInputValueId('#city');
     addressbookappObject._state = getInputValueId('#state');
     addressbookappObject._address = getInputValueId('#address').replace(/\s/g, ' ');
+    addressbookappObject._zipcode = getInputValueId('#zipcode');
     
 }
 
-function createOrUpdateAddressBookInJsonServer() {
-    let url = site_properties.server_url;
-    let methodCall = "POST";
-    let message = "Data Store with name ";
-    if (isUpdate) {
-        methodCall = "PUT";
-        url = url + addressbookappObject.id.toString();
-        message = "Data Updated with name ";
-    }
-    makeServiceCall(methodCall, url, true, addressbookappObject)
-        .then(response => {
-            //  return;
-            alert(message + addressbookappObject._name)
-            redirect();
-        })
-        .catch(error => {
-            console.log("inside error")
-            throw error
-        });
-}
 
 const getInputValueId = (id) => {
     let value = document.querySelector(id).value;
@@ -120,7 +86,6 @@ const getSelectedValue = (propertyValue) => {
     });
     return setItem;
 }
-
 const setTextValue = (id, value) => {
     let textError = document.querySelector(id);
     textError.textContent = value;
@@ -132,17 +97,12 @@ const createNewEmpId = () => {
     localStorage.setItem('EmpId', empId);
     return empId;
 }
-
-
-
 const createAndUpdateStorage = () => {
     let dataList = JSON.parse(localStorage.getItem("AddressBookApp"));
 
     if (dataList) {
         let existingEmpData = dataList.find(empData => empData.id == addressbookappObject.id);
         if (!existingEmpData) {
-            //No Need of id it will added in json server bydefault
-            // addressbookappObject.id = createNewEmpId();
             dataList.push(addressbookappObject);
         } else {
             const index = dataList.map(empData => empData.id).indexOf(addressbookappObject.id);
@@ -161,6 +121,7 @@ const resetForm = () => {
     setValue('#city', '');
     setValue('#state', '');
     setValue('#address', '');
+    setValue('#zipcode', '');
 }
 const unsetSelectedValues = (propertyValue) => {
     let allItems = document.querySelectorAll(propertyValue);
@@ -177,9 +138,10 @@ const setValue = (id, value) => {
 const checkForUpdate = () => {
     const jsonData = localStorage.getItem('edit-emp');
     isUpdate = jsonData ? true : false;
-    if (!isUpdate) return;
-    addressbookappObject = JSON.parse(jsonData);
-    setForm();
+    if (!isUpdate) {return}
+    else{ addressbookappObject = JSON.parse(jsonData);
+        setForm();
+    }
 }
 
 const setForm = () => {
@@ -190,6 +152,7 @@ const setForm = () => {
     setValue('#state', addressbookappObject._state);
   
     setValue('#address', addressbookappObject._address);
+    setValue('#zipcode', addressbookappObject._zipcode);
 }
 
 const setSelectedValue = (propertyValue, value) => {

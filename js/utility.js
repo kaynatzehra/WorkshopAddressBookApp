@@ -5,7 +5,7 @@ const strigifyDate = (date) => {
 }
 
 const checkName=(name)=>{
-     let nameRegex=RegExp('^[A-Z]{1}[a-zA-Z]{2,}$')
+     let nameRegex=RegExp('^[A-Z]{1}[a-zA-Z_ ]{2,}$')
     if(!nameRegex.test(name))
         throw "Name Is Incorrect!"
 }
